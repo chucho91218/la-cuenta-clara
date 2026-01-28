@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Trash2, Users, Calculator, Sparkles } from "lucide-react"
+import { Plus, Trash2, Users, Calculator, Sparkles, Pencil, Check, X } from "lucide-react"
 
 interface Participante {
   id: number
@@ -21,6 +21,38 @@ export default function Home() {
   const [monto, setMonto] = useState("")
   const [nextId, setNextId] = useState(1)
 
+  // =========================
+  // EDITAR PARTICIPANTE
+  // =========================
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editNombre, setEditNombre] = useState("")
+  const [editMonto, setEditMonto] = useState("")
+
+  const startEdit = (p: Participante) => {
+    setEditingId(p.id)
+    setEditNombre(p.nombre)
+    setEditMonto(String(p.monto))
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditNombre("")
+    setEditMonto("")
+  }
+
+  const saveEdit = (id: number) => {
+    const nombre = editNombre.trim()
+    const monto = Number(editMonto)
+
+    if (!nombre || Number.isNaN(monto)) return
+
+    setParticipantes((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, nombre, monto } : p)),
+    )
+
+    cancelEdit()
+  }
+
   const agregarParticipante = () => {
     if (nombre.trim() && monto.trim()) {
       setParticipantes([
@@ -34,6 +66,8 @@ export default function Home() {
   }
 
   const eliminarParticipante = (id: number) => {
+    // si borrás el que estabas editando, cancelamos edición
+    if (editingId === id) cancelEdit()
     setParticipantes(participantes.filter((p) => p.id !== id))
   }
 
@@ -95,7 +129,6 @@ export default function Home() {
               alt="La Cuenta Clara"
               className="h-35 w-35 object-contain"
             />
-            
           </div>
 
           <nav className="flex items-center gap-6">
@@ -115,24 +148,18 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero (compacto + portada con tinte rojo suave) */}
+      {/* Hero */}
       <section className="relative isolate overflow-hidden pt-10 pb-10 sm:pt-12 sm:pb-12">
-        {/* Fondo (NO puede capturar clicks) */}
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <img
             src="/images/portada.png"
             alt=""
             className="h-full w-full object-cover object-[50%_88%]"
           />
-
-          {/* overlay rojo MUY suave */}
           <div className="absolute inset-0 bg-primary/22" />
-
-          {/* degradado sutil para legibilidad */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/25" />
         </div>
 
-        {/* Contenido */}
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-10 sm:pt-14">
           <div className="mb-3">
             <p className="text-white/90 text-xs sm:text-sm tracking-wide">
@@ -163,7 +190,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1: Agregar aporte */}
+            {/* Card 1 */}
             <div className="bg-card rounded-2xl p-8 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -199,7 +226,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Card 2: Participantes */}
+            {/* Card 2 */}
             <div className="bg-card rounded-2xl p-8 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -217,33 +244,90 @@ export default function Home() {
                 </div>
               ) : (
                 <ul className="space-y-3 max-h-64 overflow-y-auto">
-                  {participantes.map((p) => (
-                    <li
-                      key={p.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-muted"
-                    >
-                      <div>
-                        <span className="font-medium text-foreground">
-                          {p.nombre}
-                        </span>
-                        <span className="text-muted-foreground ml-2">
-                          ${p.monto.toFixed(2)}
-                        </span>
-                      </div>
+                  {participantes.map((p) => {
+                    const isEditing = editingId === p.id
 
-                      <button
-                        onClick={() => eliminarParticipante(p.id)}
-                        className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                    return (
+                      <li
+                        key={p.id}
+                        className="flex items-center justify-between p-3 rounded-xl bg-muted"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </li>
-                  ))}
+                        {/* Izquierda */}
+                        {!isEditing ? (
+                          <div>
+                            <span className="font-medium text-foreground">
+                              {p.nombre}
+                            </span>
+                            <span className="text-muted-foreground ml-2">
+                              ${p.monto.toFixed(2)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2 w-full pr-3">
+                            <input
+                              value={editNombre}
+                              onChange={(e) => setEditNombre(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                              placeholder="Nombre"
+                            />
+                            <input
+                              value={editMonto}
+                              onChange={(e) => setEditMonto(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                              placeholder="Monto"
+                              inputMode="decimal"
+                            />
+                          </div>
+                        )}
+
+                        {/* Derecha (acciones) */}
+                        <div className="flex items-center gap-2">
+                          {!isEditing ? (
+                            <>
+                              <button
+                                onClick={() => startEdit(p)}
+                                className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                                title="Editar"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={() => eliminarParticipante(p.id)}
+                                className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                                title="Borrar"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => saveEdit(p.id)}
+                                className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                                title="Guardar"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={cancelEdit}
+                                className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                                title="Cancelar"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </div>
 
-            {/* Card 3: Resultado */}
+            {/* Card 3 */}
             <div className="bg-card rounded-2xl p-8 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
