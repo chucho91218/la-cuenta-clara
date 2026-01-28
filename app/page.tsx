@@ -416,17 +416,20 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-16 px-6 bg-background border-t border-border">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="mb-8 text-center">
+  <p className="text-foreground font-medium">¿Querés apoyar el proyecto? </p>
+          
           <a
-            href="https://cafecito.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-full hover:opacity-90 transition-opacity mb-8"
-          >
-            Invitame un cafecito ☕
-          </a>
+  href="https://link.mercadopago.com.ar/chucho"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center gap-2 px-6 py-3 bg-sky-500 text-white font-medium rounded-full hover:bg-sky-600 transition-colors mb-8"
+>
+  Donar por Mercado Pago
+</a>
+
           <p className="text-muted-foreground">
-            Hecho con <span className="text-primary">♥</span> por Agustín Luque
+            Hecho por Agustín Luque
           </p>
         </div>
       </footer>
